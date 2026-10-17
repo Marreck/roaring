@@ -1,5 +1,9 @@
 # roaring 
 
+> **This is a fork.** `github.com/Marreck/roaring/v2` is upstream [RoaringBitmap/roaring](https://github.com/RoaringBitmap/roaring)
+> v2.26.0 with the module path renamed, plus `Bitmap.PreviousValueAnd` and `Bitmap.NextValueAnd` (`valueand.go`), which find
+> the previous or next common value of two bitmaps without building their intersection. 
+
 [![GoDoc](https://godoc.org/github.com/RoaringBitmap/roaring?status.svg)](https://godoc.org/github.com/RoaringBitmap/roaring)
 
 ![Go-CI](https://github.com/RoaringBitmap/roaring/workflows/Go-CI/badge.svg)

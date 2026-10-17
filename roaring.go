@@ -13,7 +13,7 @@ import (
 	"math/bits"
 	"strconv"
 
-	"github.com/RoaringBitmap/roaring/v2/internal"
+	"github.com/Marreck/roaring/v2/internal"
 	"github.com/bits-and-blooms/bitset"
 )
 

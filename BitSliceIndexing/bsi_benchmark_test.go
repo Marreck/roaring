@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/RoaringBitmap/roaring/v2"
+	"github.com/Marreck/roaring/v2"
 	"github.com/stretchr/testify/assert"
 )
 
