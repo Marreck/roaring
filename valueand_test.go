@@ -127,29 +127,29 @@ func valueAndTargets(r *rand.Rand, a, b *Bitmap) []uint32 {
 	return targets
 }
 
+// valueAndView turns a bitmap into another bitmap with the same values, held differently.
+type valueAndView struct {
+	name string
+	view func(t *testing.T, bm *Bitmap) *Bitmap
+}
+
+// valueAndViews are the views TestPreviousAndNextValueAnd runs on. Frozen views, which only little-endian builds
+// have, are added by valueand_frozen_test.go.
+var valueAndViews = []valueAndView{
+	{"plain", func(_ *testing.T, bm *Bitmap) *Bitmap { return bm }},
+	{"buffer", func(t *testing.T, bm *Bitmap) *Bitmap {
+		buf, err := bm.ToBytes()
+		require.NoError(t, err)
+		out := New()
+		_, err = out.FromBuffer(buf)
+		require.NoError(t, err)
+		return out
+	}},
+}
+
 func TestPreviousAndNextValueAnd(t *testing.T) {
 	r := rand.New(rand.NewSource(42))
-	views := []struct {
-		name string
-		view func(*Bitmap) *Bitmap
-	}{
-		{"plain", func(bm *Bitmap) *Bitmap { return bm }},
-		{"frozen", func(bm *Bitmap) *Bitmap {
-			buf, err := bm.Freeze()
-			require.NoError(t, err)
-			out := New()
-			require.NoError(t, out.FrozenView(buf))
-			return out
-		}},
-		{"buffer", func(bm *Bitmap) *Bitmap {
-			buf, err := bm.ToBytes()
-			require.NoError(t, err)
-			out := New()
-			_, err = out.FromBuffer(buf)
-			require.NoError(t, err)
-			return out
-		}},
-	}
+	views := valueAndViews
 	for iter := 0; iter < 300; iter++ {
 		a, b := randomValueAndBitmap(r), randomValueAndBitmap(r)
 		switch r.Intn(4) {
@@ -159,7 +159,7 @@ func TestPreviousAndNextValueAnd(t *testing.T) {
 			b = sampleWithNoise(r, a) // a small part of a among values that are not in it
 		}
 		view := views[iter%len(views)]
-		va, vb := view.view(a), view.view(b)
+		va, vb := view.view(t, a), view.view(t, b)
 		for _, target := range valueAndTargets(r, a, b) {
 			wantPrev := previousValueAndReference(a, b, target)
 			wantNext := nextValueAndReference(a, b, target)
@@ -191,7 +191,7 @@ func TestPreviousAndNextValueAndSmall(t *testing.T) {
 	assert.EqualValues(t, 9, a.NextValueAnd(b, 6))
 	assert.EqualValues(t, 70010, a.NextValueAnd(b, 10))
 	assert.EqualValues(t, -1, a.NextValueAnd(b, 1<<20+1))
-	assert.EqualValues(t, math.MaxUint32, b.NextValueAnd(b, math.MaxUint32))
+	assert.EqualValues(t, int64(math.MaxUint32), b.NextValueAnd(b, math.MaxUint32))
 	assert.EqualValues(t, -1, a.NextValueAnd(empty, 0))
 }
 
